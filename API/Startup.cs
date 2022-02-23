@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Infrastructure.Data;
 using Core.Interfaces;
 using System.Linq;
+using API.Helpers;
+using AutoMapper;
 
 namespace API
 {
@@ -27,12 +29,15 @@ namespace API
 
             services.AddControllers();
             services.AddScoped<IProductRepository, ProductRepository>();
+            //DI for generic repository
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            //To automap Product entity with ProductToReturnDto
+            services.AddAutoMapper(typeof(MappingProfiles));
             services.AddDbContext<StoreContext>(x => 
                     x.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-                //c.ResolveConflictingActions (apiDescriptions => apiDescriptions.First());
             });
 
             
@@ -51,6 +56,8 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            //to serve static files such as product images
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
