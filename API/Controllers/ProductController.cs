@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Errors;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -15,9 +16,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+  
+    public class ProductController : BaseApiController
     {
         private readonly IGenericRepository<Product> _productsRepo;
         private readonly IGenericRepository<ProductBrand> _productBrandRepo;
@@ -40,7 +40,7 @@ namespace API.Controllers
         {
             var spec = new ProductWithTypesAndBrandSpecification();
             var products = await _productsRepo.ListAsycn(spec);
-            //to map product entity to ProductToReturnDto using Automapper
+            //to map product entity to ProductToReturnDto using A
 
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
         }
@@ -50,6 +50,7 @@ namespace API.Controllers
         {
             var spec = new ProductWithTypesAndBrandSpecification(id);
             var product = await _productsRepo.GetEnityWithSpecs(spec);
+            if(product == null) return NotFound(new ApiResponse(404));
             return _mapper.Map<Product, ProductToReturnDto>(product);
         }
 
